@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technician Dashboard</title>
+    <style>
+        /* Base Styles */
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --success-color: #4cc9f0;
+            --danger-color: #f72585;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background-color: white;
+            padding: 1rem 2rem;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        /* Main Content */
+        main {
+            padding: 0 2rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Form Styles */
+        .work-order-form {
+            background-color: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* Order Cards */
+        .orders-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .order-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+
+        .order-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .status-badge.pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--gray-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-small {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--dark-color);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.hidden {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .orders-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Technician Dashboard</h1>
+        <button id="logoutBtn" class="btn-secondary">Logout</button>
+    </header>
+    <main>
+        <section class="work-order-form">
+            <h2>Submit Work Order</h2>
+            <form id="workOrderForm">
+                <div class="form-group">
+                    <label for="clientName">Client Name</label>
+                    <input type="text" id="clientName" placeholder="Enter client name" required>
+                </div>
+                <div class="form-group">
+                    <label for="serviceType">Service Type</label>
+                    <select id="serviceType" required>
+                        <option value="">Select service type</option>
+                        <option value="basic">Basic Service</option>
+                        <option value="special">Special Service</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" rows="4" placeholder="Enter work description" required></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Submit Work Order</button>
+            </form>
+        </section>
+        
+        <section class="recent-orders">
+            <h2>Your Recent Submissions</h2>
+            <div id="recentOrdersList" class="orders-list">
+                <!-- Dynamically populated -->
+            </div>
+        </section>
+    </main>
+    <div id="toast" class="toast hidden"></div>
+    <script>
+        // Work Order Storage Functions
+        function getWorkOrders() {
+            const orders = localStorage.getItem('workOrders');
+            return orders ? JSON.parse(orders) : [];
+        }
+
+        function saveWorkOrder(order) {
+            const orders = getWorkOrders();
+            orders.push(order);
+            localStorage.setItem('workOrders', JSON.stringify(orders));
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRecentOrders();
+            
+            document.getElementById('workOrderForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const workOrder = {
+                    id: Date.now(),
+                    clientName: document.getElementById('clientName').value,
+                    serviceType: document.getElementById('serviceType').value,
+                    description: document.getElementById('description').value,
+                    status: 'pending',
+                    submittedBy: 'Technician',
+                    date: new Date().toLocaleString()
+                };
+                
+                saveWorkOrder(workOrder);
+                showToast('Work order submitted successfully!');
+                this.reset();
+                loadRecentOrders();
+            });
+            
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                window.location.href = 'login.html';
+            });
+        });
+        
+        function loadRecentOrders() {
+            const ordersList = document.getElementById('recentOrdersList');
+            ordersList.innerHTML = '';
+            
+            const orders = getWorkOrders().filter(order => order.submittedBy === 'Technician');
+            
+            if (orders.length === 0) {
+                ordersList.innerHTML = '<p>No recent submissions</p>';
+                return;
+            }
+            
+            const recentOrders = orders.slice(0, 5);
+            
+            recentOrders.forEach(order => {
+                const orderElement = document.createElement('div');
+                orderElement.className = 'order-card';
+                orderElement.innerHTML = `
+                    <div class="order-header">
+                        <h3>${order.clientName}</h3>
+                        <span class="status-badge ${order.status}">${order.status}</span>
+                    </div>
+                    <p><strong>Service:</strong> ${order.serviceType === 'basic' ? 'Basic Service' : 'Special Service'}</p>
+                    <p><strong>Submitted:</strong> ${order.date}</p>
+                    <button class="btn-small" onclick="viewOrderDetails(${order.id})">View Details</button>
+                `;
+                ordersList.appendChild(orderElement);
+            });
+        }
+        
+        function viewOrderDetails(orderId) {
+            const orders = getWorkOrders();
+            const order = orders.find(o => o.id === orderId);
+            
+            if (order) {
+                alert(`Order Details:\n\nClient: ${order.clientName}\nService: ${order.serviceType}\nStatus: ${order.status}\nDescription: ${order.description}`);
+            }
+        }
+        
+        function showToast(message, duration = 3000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.remove('hidden');
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, duration);
+        }
+    </script>
+</body>
+</html>
